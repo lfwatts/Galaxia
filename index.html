@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+    <script>
+
+    //make ALL game variables here
+    let sky;
+    let ship;
+    let bullet;
+    let Title;
+    let playerLasers;
+    let collide;
+    
+   
+    //variables to store references to keys on the keyboard whose input we want
+    let enterKey;
+    let rightKey;
+    let leftKey;
+    let upKey;
+    let downKey;
+    let spaceKey;
+
+    //variables to store text objects on our game screen
+    let txtEnter;
+    let txtScore;
+    let txtScoreR;
+    let txtHiScoreR;
+    let txtHiScore;
+    let txtCreator;
+    let txtCredit;
+
+    //variables for our sound objects
+    let maintheme;
+    let enter;
+
+    //variables for ship select
+    let shipdealer;
+    let ship1;
+    let ship2;
+    let ship3;
+    let ship4;
+    let txtShipSelect;
+    let txtShipEnter;
+    let blueBox;
+    
+    //variables for levels
+    let shooting=false;
+    let shootDelay=0;
+    let score=0;
+    let lives=5;
+    let txtLives;
+    let txtLivesR;
+    let enemyGroup1;
+    let enemyGroup2;
+    let enemyGroup3;
+    let bossBullet;
+    let boss;
+    let enemyBullet;
+    let enemyDelay=0;
+    let randomShoot=30;
+    let maxEnemies=2;
+    let maxEnemies2=1;
+    let maxEnemies3=5;
+    let badguy;
+
+    //variables for transitions
+    let txtPass;
+    let txtContinue;
+
+    //variables for game over
+    let txtGameOver;
+    let txtMainMenu;
+    let txtRetry;
+
+    //variables for win screen
+    let txtWin;
+    let up;
+    let down;
+
+
+
+    //mainGame is the name of this screen
+
+     class title extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            this.load.image("sky","Images/sky.jpg");
+            this.load.image("ship","Images/ship.png");
+            this.load.image("Title","Images/Title.png");
+            this.load.image("bullet","Images/bullet.png");
+            //the above function requires 2 parameters:1. the ID of the resource and 2. the relative path to the resource
+
+
+            //load sound resources
+            this.load.audio("theme",["MainScreen.mp3"]);
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+
+        }//end of preload
+
+        
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+
+            sky=this.physics.add.image(400,300,"sky");
+            bullet=this.physics.add.image(-400,-300,"bullet");
+            txtEnter=this.add.text(200,320,"Press the enter button to play",{fontFamily:"Courier New",fontSize:22,color:'white'});
+            txtScore=this.add.text(100,10,"Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtScoreR=this.add.text(100,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScoreR=this.add.text(550,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScore=this.add.text(550,10,"Hi-Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtCreator=this.add.text(100,360,"Created by Logan Watts, Jack Burger, Minura Mol and Joshua Voth",{fontFamily:"Courier New",fontSize:15,color:'green'});
+            txtCredit=this.add.text(120,380,"This game was inspired by games like Galaga and Galaxian.",{fontFamily:"Courier New",fontSize:15,color:'green'});
+            ship=this.physics.add.image(400,500,"ship");
+            Title=this.physics.add.image(400,200, "Title");
+           
+
+            enterKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+            rightKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+            leftKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+            upKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+            downKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+            spaceKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+            //add sounds
+            maintheme=this.sound.add("theme");
+            enter=this.sound.add("enter");
+
+            maintheme.play();
+
+
+           
+            ship.setCollideWorldBounds(true);
+
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+            lives=5;
+            score=0;
+            if(rightKey.isDown)
+            {
+                ship.x+=20;
+            }
+
+            if (leftKey.isDown) 
+            {
+                ship.x-=20;
+            }
+
+            if(upKey.isDown)
+            {
+                ship.y-=15;
+            }
+
+            if (downKey.isDown) 
+            {
+                ship.y+=15;
+            }
+
+            if(spaceKey.isDown && shooting==false)
+            {
+                bullet.x=ship.x;
+                bullet.y=ship.y;
+                bullet.setVelocity(0,-1000);
+                shooting=true;
+
+            }
+            if(shooting==true)
+            {
+                shootDelay++;
+            }
+            if(shootDelay>15)
+            {
+                shooting=false;
+                shootDelay=0;
+            }
+
+           if(enterKey.isDown)
+           {
+            maintheme.mute = true;
+            enter.play();
+            game.scene.pause("Title");
+            game.scene.start("Transition1");
+           }
+
+
+        }//end of update
+
+    }//end of the mainGame screen
+
+     class transition1 extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+           sky=this.physics.add.image(400,300,"sky"); 
+           ship=this.physics.add.image(400,400,"ship");
+           ship.setScale(.7); 
+           txtPass=this.add.text(320,150,"Level 1", {fontFamily:"Arial Black", fontSize: 30, color:'green'});
+           txtContinue=this.add.text(200,200,"Press the |Space| key to continue", {fontFamily:"Arial Black", fontSize:20, color:'white'});
+
+           rightKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+           leftKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+           spaceKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+           
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+            lives=5;
+            score=0;
+            if(rightKey.isDown)
+            {
+                ship.x+=20;
+            }
+
+            if (leftKey.isDown) 
+            {
+                ship.x-=20;
+            }
+
+            if(spaceKey.isDown)
+            {
+                enter.play();
+                game.scene.stop("Transition1");
+                game.scene.start("Level1");
+            }
+           
+
+        }//end of update
+    }
+
+
+    //more screens can be pasted here
+
+    class level1 extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+
+            //the above function requires 2 parameters:1. the ID of the resource and 2. the relative path to the resource
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            this.load.image("enemyBullet","Images/enemyBullet.png");
+            this.load.image("enemy1","Images/enemy1.png");
+            this.load.image("enemy2","Images/enemy2.png");
+
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+            sky=this.physics.add.image(400,300,"sky");
+            bullet=this.physics.add.image(-400,-300,"bullet");
+            enemyBullet=this.physics.add.image(-500, -500, "enemyBullet");
+
+            enemyGroup1 = this.physics.add.group({
+                key: 'enemy1',
+                repeat: 5,
+                setXY: { x: 15, y: 0, stepX: 70 }
+            });
+
+
+            enemyGroup1.children.iterate(function (group1) {
+
+            group1.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+            group1.setScale(.7);
+            group1.setBounce(1);
+            group1.allowGravity = false;
+            group1.setCollideWorldBounds(true);
+                
+                if(enemyGroup1.countActive(true)>maxEnemies){
+                    group1.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group1.setVelocity(Phaser.Math.Between(0, 300), Phaser.Math.Between(0, 200));
+                }
+                
+            });
+
+            
+            enemyGroup2 = this.physics.add.group({
+                key: 'enemy2',
+                repeat: 4,
+                setXY: {x:12, y:100, stepX: 50}
+            });
+
+            enemyGroup2.children.iterate(function(group2){
+
+                group2.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                group2.setScale(.5);
+                group2.setBounce(1);
+                group2.allowGravity = false;
+                group2.setCollideWorldBounds(true);
+                if(enemyGroup2.countActive(true)>maxEnemies2){
+                    group2.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group2.setVelocity(Phaser.Math.Between(0, 500), 0);
+                }
+            });
+
+
+            this.physics.add.collider(enemyGroup1,enemyGroup1);
+            this.physics.add.overlap(enemyGroup1, bullet, enemyKill, null, this);
+            this.physics.add.overlap(enemyGroup1, enemyGroup1, enemyOverlap, null, this);
+            this.physics.add.overlap(enemyGroup2, bullet, enemyKill2, null, this);
+            this.physics.add.collider(enemyGroup2, enemyGroup2);
+            this.physics.add.overlap(enemyGroup2, enemyGroup2, enemyOverlap2, null, this);
+
+            ship=this.physics.add.image(400,500,"ship");
+            ship.setScale(.7);
+            
+
+            this.physics.add.overlap(ship, enemyGroup1, playerHit, null, this);
+            this.physics.add.overlap(ship, enemyGroup2, playerHit2, null, this);
+            this.physics.add.overlap(ship, enemyBullet, playerKill, null, this);
+
+            txtScore=this.add.text(100,10,"Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtScoreR=this.add.text(100,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScoreR=this.add.text(550,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScore=this.add.text(550,10,"Hi-Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtLives=this.add.text(300,10,"Lives:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtLivesR=this.add.text(300,35,"5", {fontFamily:"Monaco", fontSize:20, color:'white'});
+
+
+            rightKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+            leftKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+            upKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+            downKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+            spaceKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+            ship.setCollideWorldBounds(true);
+
+
+        }//end of create
+
+
+        update()//game loop, where all decisions and updates are made 
+        {
+ 
+            if(rightKey.isDown)
+            {
+                ship.x+=20;
+            }
+
+            if (leftKey.isDown) 
+            {
+                ship.x-=20;
+            }
+
+            if(upKey.isDown)
+            {
+                ship.y-=15;
+            }
+
+            if (downKey.isDown) 
+            {
+                ship.y+=15;
+            }
+
+            if(spaceKey.isDown && shooting==false)
+            {
+                bullet.x=ship.x;
+                bullet.y=ship.y;
+                bullet.setVelocity(0,-1000);
+                shooting=true;
+
+            }
+            if(shooting==true)
+            {
+                shootDelay++;
+            }
+
+            if(shootDelay>15)
+            {
+                shooting=false;
+                shootDelay=0;
+            }
+            if(enemyDelay>=randomShoot){
+                //shoot
+                if(enemyGroup2.countActive(true)>0){
+
+                    enemyGroup2.children.iterate(function(group2){
+                        if(group2.active){
+                            badguy=group2;
+                            
+                        }
+                    });
+                   
+                    enemyBullet.enableBody(true,true);
+                    enemyBullet.x=badguy.x;
+                    enemyBullet.y=badguy.y;
+                    enemyBullet.setVelocity(0,1000);
+                }
+                //choose new random wait time
+                randomShoot = Math.round(Math.random()*50);
+                enemyDelay=0;
+            }
+            else
+            {
+                enemyDelay++;
+
+            }
+
+            if(score>=800)
+            {
+                game.scene.stop("Level1");
+                game.scene.start("Transition2");
+            }
+
+        }//end of update
+
+    }//end of the level1 screen
+
+    class transition2 extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+           sky=this.physics.add.image(400,300,"sky"); 
+           ship=this.physics.add.image(400,400,"ship");
+           ship.setScale(.7); 
+           txtPass=this.add.text(200,150,"You completed Level 1", {fontFamily:"Arial Black", fontSize: 30, color:'green'});
+           txtContinue=this.add.text(200,200,"Press the |Space| key to continue", {fontFamily:"Arial Black", fontSize:20, color:'white'});
+
+           rightKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+           leftKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+           spaceKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+           
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+            if(rightKey.isDown)
+            {
+                ship.x+=20;
+            }
+
+            if (leftKey.isDown) 
+            {
+                ship.x-=20;
+            }
+
+            if(spaceKey.isDown)
+            {
+                enter.play();
+                game.scene.stop("Transition2");
+                game.scene.start("Level2");
+            }
+           
+
+        }//end of update
+    }
+
+
+    class level2 extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            this.load.image("enemyBullet","Images/enemyBullet.png");
+            this.load.image("enemy1","Images/enemy1.png");
+            this.load.image("enemy2","Images/enemy2.png");
+            this.load.image("enemy3","Images/enemy3.png");
+
+
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+            sky=this.physics.add.image(400,300,"sky");
+            bullet=this.physics.add.image(-400,-300,"bullet");
+            enemyBullet=this.physics.add.image(-500, -500, "enemyBullet");
+
+            enemyGroup1 = this.physics.add.group({
+                key: 'enemy1',
+                repeat: 5,
+                setXY: { x: 12, y: 0, stepX: 70 }
+            });
+
+
+            enemyGroup1.children.iterate(function (group1) {
+
+            group1.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+            group1.setScale(.7);
+            group1.setBounce(1);
+            group1.allowGravity = false;
+            group1.setCollideWorldBounds(true);
+                
+                if(enemyGroup1.countActive(true)>maxEnemies){
+                    group1.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group1.setVelocity(Phaser.Math.Between(0, 300), Phaser.Math.Between(0, 200));
+                }
+                
+            });
+
+            
+            enemyGroup2 = this.physics.add.group({
+                key: 'enemy2',
+                repeat: 4,
+                setXY: {x:12, y:100, stepX: 50}
+            });
+
+            enemyGroup2.children.iterate(function(group2){
+
+                group2.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                group2.setScale(.5);
+                group2.setBounce(1);
+                group2.allowGravity = false;
+                group2.setCollideWorldBounds(true);
+             
+
+                if(enemyGroup2.countActive(true)>maxEnemies2){
+                    group2.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group2.setVelocity(Phaser.Math.Between(0, 300), 5);
+                }
+            });
+
+
+
+            this.physics.add.collider(enemyGroup1,enemyGroup1);
+            this.physics.add.overlap(enemyGroup1, bullet, enemyKill, null, this);
+            this.physics.add.overlap(enemyGroup1, enemyGroup1, enemyOverlap, null, this);
+            this.physics.add.overlap(enemyGroup2, bullet, enemyKill2, null, this);
+            this.physics.add.collider(enemyGroup2, enemyGroup2);
+            this.physics.add.overlap(enemyGroup2, enemyGroup2, enemyOverlap2, null, this);
+
+            ship=this.physics.add.image(400,500,"ship");
+            ship.setScale(.7);
+            
+
+            this.physics.add.overlap(ship, enemyGroup1, playerHit, null, this);
+            this.physics.add.overlap(ship, enemyGroup2, playerHit2, null, this);
+            this.physics.add.overlap(ship, enemyBullet, playerKill, null, this);
+
+            txtScore=this.add.text(100,10,"Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtScoreR=this.add.text(100,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScoreR=this.add.text(550,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScore=this.add.text(550,10,"Hi-Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtLives=this.add.text(300,10,"Lives:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtLivesR=this.add.text(300,35,"5", {fontFamily:"Monaco", fontSize:20, color:'white'});
+
+
+            rightKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+            leftKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+            upKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+            downKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+            spaceKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+            ship.setCollideWorldBounds(true);
+            
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+            if(rightKey.isDown)
+            {
+                ship.x+=20;
+            }
+
+            if (leftKey.isDown) 
+            {
+                ship.x-=20;
+            }
+
+            if(upKey.isDown)
+            {
+                ship.y-=15;
+            }
+
+            if (downKey.isDown) 
+            {
+                ship.y+=15;
+            }
+
+            if(spaceKey.isDown && shooting==false)
+            {
+                bullet.x=ship.x;
+                bullet.y=ship.y;
+                bullet.setVelocity(0,-1000);
+                shooting=true;
+
+            }
+
+            if(shooting==true)
+            {
+                shootDelay++;
+            }
+            if(shootDelay>15)
+            {
+                shooting=false;
+                shootDelay=0;
+            }
+
+            if(enemyDelay>=randomShoot){
+                //shoot
+                if(enemyGroup2.countActive(true)>0){
+
+                    enemyGroup2.children.iterate(function(group2){
+                        if(group2.active){
+                            badguy=group2;
+                            
+                        }
+                    });
+                   
+                    enemyBullet.enableBody(true,true);
+                    enemyBullet.x=badguy.x;
+                    enemyBullet.y=badguy.y;
+                    enemyBullet.setVelocity(0,1000);
+                }
+                //choose new random wait time
+                randomShoot = Math.round(Math.random()*50);
+                enemyDelay=0;
+            }
+            else
+            {
+                enemyDelay++;
+
+            }
+
+            if(score>=2000)
+            {
+                game.scene.pause("Level2");
+                game.scene.start("Transition3");
+            }
+
+           
+
+        }//end of update
+
+    }
+
+    class transition3 extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+           sky=this.physics.add.image(400,300,"sky"); 
+           ship=this.physics.add.image(400,400,"ship");
+           ship.setScale(.7); 
+           txtPass=this.add.text(200,150,"You completed Level 2", {fontFamily:"Arial Black", fontSize: 30, color:'green'});
+           txtContinue=this.add.text(200,200,"Press the |Space| key to continue", {fontFamily:"Arial Black", fontSize:20, color:'white'});
+
+           rightKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+           leftKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+           spaceKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+           
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+            if(rightKey.isDown)
+            {
+                ship.x+=20;
+            }
+
+            if (leftKey.isDown) 
+            {
+                ship.x-=20;
+            }
+
+            if(spaceKey.isDown)
+            {
+                enter.play();
+                game.scene.stop("Transition3");
+                game.scene.start("Level3");
+            }
+           
+
+        }//end of update
+    }
+
+    class level3 extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            this.load.image("enemyBullet","Images/enemyBullet.png");
+            this.load.image("enemy1","Images/enemy1.png");
+            this.load.image("enemy2","Images/enemy2.png");
+            this.load.image("enemy3","Images/enemy3.png");
+
+
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+           sky=this.physics.add.image(400,300,"sky");
+            bullet=this.physics.add.image(-400,-300,"bullet");
+            enemyBullet=this.physics.add.image(-500, -500, "enemyBullet");
+
+            enemyGroup1 = this.physics.add.group({
+                key: 'enemy1',
+                repeat: 5,
+                setXY: { x: 12, y: 0, stepX: 70 }
+            });
+
+
+            enemyGroup1.children.iterate(function (group1) {
+
+            group1.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+            group1.setScale(.7);
+            group1.setBounce(1);
+            group1.allowGravity = false;
+            group1.setCollideWorldBounds(true);
+                
+                if(enemyGroup1.countActive(true)>maxEnemies){
+                    group1.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group1.setVelocity(Phaser.Math.Between(0, 300), Phaser.Math.Between(0, 200));
+                }
+                
+            });
+
+            
+            enemyGroup2 = this.physics.add.group({
+                key: 'enemy2',
+                repeat: 4,
+                setXY: {x:12, y:100, stepX: 50}
+            });
+
+            enemyGroup2.children.iterate(function(group2){
+
+                group2.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                group2.setScale(.5);
+                group2.setBounce(1);
+                group2.allowGravity = false;
+                group2.setCollideWorldBounds(true);
+             
+
+                if(enemyGroup2.countActive(true)>maxEnemies2){
+                    group2.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group2.setVelocity(Phaser.Math.Between(0, 400), 5);
+                }
+            });
+
+            enemyGroup3 = this.physics.add.group({
+                key: 'enemy3',
+                repeat: 10,
+                setXY: {x:12, y:50, stepX: 80}
+            });
+
+            enemyGroup3.children.iterate(function(group3){
+
+                group3.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                group3.setScale(.5);
+                group3.setBounce(1);
+                group3.allowGravity = false;
+                group3.setCollideWorldBounds(true);
+             
+
+                if(enemyGroup3.countActive(true)>maxEnemies3){
+                    group3.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group3.setVelocity(0, Phaser.Math.Between(0, 200));
+                }
+            });
+
+
+
+            this.physics.add.collider(enemyGroup1,enemyGroup1);
+            this.physics.add.overlap(enemyGroup1, bullet, enemyKill, null, this);
+            this.physics.add.overlap(enemyGroup1, enemyGroup1, enemyOverlap, null, this);
+            this.physics.add.overlap(enemyGroup2, bullet, enemyKill2, null, this);
+            this.physics.add.collider(enemyGroup2, enemyGroup2);
+            this.physics.add.overlap(enemyGroup2, enemyGroup2, enemyOverlap2, null, this);
+            this.physics.add.overlap(enemyGroup3, bullet, enemyKill3, null, this);
+            this.physics.add.collider(enemyGroup3, enemyGroup3);
+            this.physics.add.overlap(enemyGroup3, enemyGroup3, enemyOverlap3, null, this);
+
+            ship=this.physics.add.image(400,500,"ship");
+            ship.setScale(.7);
+            
+
+            this.physics.add.overlap(ship, enemyGroup1, playerHit, null, this);
+            this.physics.add.overlap(ship, enemyGroup2, playerHit2, null, this);
+            this.physics.add.overlap(ship, enemyBullet, playerKill, null, this);
+            this.physics.add.overlap(ship, enemyGroup3, playerHit3, null, this);
+
+            txtScore=this.add.text(100,10,"Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtScoreR=this.add.text(100,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScoreR=this.add.text(550,35,"000",{fontFamily:"Monaco", fontSize:20, color:'white'});
+            txtHiScore=this.add.text(550,10,"Hi-Score:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtLives=this.add.text(300,10,"Lives:",{fontFamily:"Arial Black", fontSize:22, color:'red'});
+            txtLivesR=this.add.text(300,35,"5", {fontFamily:"Monaco", fontSize:20, color:'white'});
+
+
+            rightKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+            leftKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+            upKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+            downKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+            spaceKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+            ship.setCollideWorldBounds(true);
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+            if(rightKey.isDown)
+            {
+                ship.x+=20;
+            }
+
+            if (leftKey.isDown) 
+            {
+                ship.x-=20;
+            }
+
+            if(upKey.isDown)
+            {
+                ship.y-=15;
+            }
+
+            if (downKey.isDown) 
+            {
+                ship.y+=15;
+            }
+
+            if(spaceKey.isDown && shooting==false)
+            {
+                bullet.x=ship.x;
+                bullet.y=ship.y;
+                bullet.setVelocity(0,-1000);
+                shooting=true;
+
+            }
+            if(shooting==true)
+            {
+                shootDelay++;
+            }
+            if(shootDelay>15)
+            {
+                shooting=false;
+                shootDelay=0;
+            }
+
+            if(enemyDelay>=randomShoot){
+                //shoot
+                if(enemyGroup2.countActive(true)>0){
+
+                    enemyGroup2.children.iterate(function(group2){
+                        if(group2.active){
+                            badguy=group2;
+                            
+                        }
+                    });
+                   
+                    enemyBullet.enableBody(true,true);
+                    enemyBullet.x=badguy.x;
+                    enemyBullet.y=badguy.y;
+                    enemyBullet.setVelocity(0,1000);
+                }
+                //choose new random wait time
+                randomShoot = Math.round(Math.random()*50);
+                enemyDelay=0;
+            }
+            else
+            {
+                enemyDelay++;
+            }
+
+            if(score>=4000)
+            {
+                game.scene.stop("Level3");
+                game.scene.start("Victory");
+            }
+           
+
+        }//end of update
+    }
+
+
+    function enemyOverlap(enemy1, enemy2){
+        enemy1.x=Math.round(Math.random()*800);
+        enemy2.x=Math.round(Math.random()*800);
+     }
+
+    function enemyKill(bullet, badguy){
+        badguy.disableBody(true, true);
+        enter.play();
+        //  Add and update the score
+        score += 4000;
+        txtScoreR.setText(+score);
+        txtHiScoreR.setText(+score);
+
+        //If game not over add more badbuys
+        if (enemyGroup1.countActive(true) === 0)
+        {   
+            maxEnemies+=1;
+            
+            enemyGroup1.children.iterate(function (child) {
+
+                child.enableBody(true, child.x, 0, true, true);
+                child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                child.setScale(.7);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(Phaser.Math.Between(-200, 200), 20);
+                child.allowGravity = false;
+                if(enemyGroup1.countActive(true)>maxEnemies){
+                    child.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    child.setVelocity(Phaser.Math.Between(0, 600), Phaser.Math.Between(0, 200));
+
+                }
+
+            });
+        }
+
+
+    }
+
+    function playerHit(player, badguy){
+
+        badguy.disableBody(true,true);
+        lives-=1;
+        txtLivesR.setText(+lives);
+        
+        if(lives === 4){
+            player.setTint(0xf1dcdc);
+        }
+        else if(lives === 3){
+            player.setTint(0xecb7b7);
+        }
+        else if(lives === 2){
+            player.setTint(0xfa8c8c);
+        }
+        else if(lives === 1){
+            player.setTint(0xff5555);
+        }
+        else{
+            game.scene.stop("Level1");
+            game.scene.stop("Transition2");
+            game.scene.stop("Level2");
+            game.scene.stop("Transition3");
+            game.scene.stop("Level3");
+            game.scene.start("Over");
+        }
+        
+        player.setBounce(0.0);
+
+        //If game not over add more badbuys
+        if (enemyGroup1.countActive(true) == 0)
+        {   
+            maxEnemies+=1;
+            enemyGroup1.children.iterate(function (child) {
+
+                child.enableBody(true, child.x, 0, true, true);
+                child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                child.setScale(.7);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(Phaser.Math.Between(-200, 200), 20);
+                child.allowGravity = false;
+                if(enemyGroup1.countActive(true)>maxEnemies){
+                    child.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    child.setVelocity(Phaser.Math.Between(0, 600), Phaser.Math.Between(0, 200));
+
+                }
+
+            });
+        }
+
+
+    }
+
+    function enemyKill2(bullet, badguy){
+        badguy.disableBody(true, true);
+        enter.play();
+        //  Add and update the score
+        score += 100;
+        txtScoreR.setText(+score);
+        txtHiScoreR.setText(+score);
+
+        //If game not over add more badbuys
+        if (enemyGroup2.countActive(true) === 0)
+        {   
+            maxEnemies2+=1;
+            
+            enemyGroup2.children.iterate(function (group2) {
+
+                group2.enableBody(true, group2.x, 100, true, true);
+                group2.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                group2.setScale(.5);
+                group2.setBounce(1);
+                group2.setCollideWorldBounds(true);
+                group2.setVelocity(Phaser.Math.Between(-200, 200), 20);
+                enemyGroup2.allowGravity = false;
+                if(enemyGroup2.countActive(true)>maxEnemies2){
+                    group2.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group2.setVelocity(Phaser.Math.Between(0,600),0);
+                }
+
+            });
+        }
+    }
+
+    function playerHit2(player, badguy){
+
+        badguy.disableBody(true,true);
+        lives-=1;
+        txtLivesR.setText(+lives);
+        
+        if(lives === 4){
+            player.setTint(0xf1dcdc);
+        }
+        else if(lives === 3){
+            player.setTint(0xecb7b7);
+        }
+        else if(lives === 2){
+            player.setTint(0xfa8c8c);
+        }
+        else if(lives === 1){
+            player.setTint(0xff5555);
+        }
+        else{
+            game.scene.stop("Level1");
+            game.scene.stop("Transition2");
+            game.scene.stop("Level2");
+            game.scene.stop("Transition3");
+            game.scene.stop("Level3")
+            game.scene.start("Over");
+        }
+        
+        player.setBounce(0.0);
+
+        //If game not over add more badbuys
+        if (enemyGroup2.countActive(true) == 0)
+        {   
+            maxEnemies2+=1;
+            enemyGroup2.children.iterate(function (child) {
+
+                child.enableBody(true, child.x, 0, true, true);
+                child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                child.setScale(.5);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(Phaser.Math.Between(-200, 200), 20);
+                child.allowGravity = false;
+                if(enemyGroup2.countActive(true)>maxEnemies2){
+                    child.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    child.setVelocity(Phaser.Math.Between(0, 600), Phaser.Math.Between(0, 200));
+
+                }
+
+            });
+        }
+
+
+    }
+
+    function playerKill (player,enemyBullet){
+        enemyBullet.kill();
+        lives-=1;
+        txtLivesR.setText(+lives);
+        
+        if(lives === 4){
+            player.setTint(0xf1dcdc);
+        }
+        else if(lives === 3){
+            player.setTint(0xecb7b7);
+        }
+        else if(lives === 2){
+            player.setTint(0xfa8c8c);
+        }
+        else if(lives === 1){
+            player.setTint(0xff5555);
+        }
+        else{
+            game.scene.stop("Level1");
+            game.scene.stop("Transition2");
+            game.scene.stop("Level2");
+            game.scene.stop("Transition3");
+            game.scene.stop("Level3");
+            game.scene.start("Over");
+        }
+        player.setBounce(0.0);
+
+    }
+
+    function enemyOverlap2(enemy1, enemy2){
+        enemy1.x=Math.round(Math.random()*800);
+        enemy2.x=Math.round(Math.random()*800);
+     }
+
+    function enemyKill3(bullet, badguy){
+        badguy.disableBody(true, true);
+        enter.play();
+        //  Add and update the score
+        score += 100;
+        txtScoreR.setText(+score);
+        txtHiScoreR.setText(+score);
+
+        //If game not over add more badbuys
+        if (enemyGroup3.countActive(true) === 0)
+        {   
+            maxEnemies3+=1;
+            
+            enemyGroup3.children.iterate(function (group3) {
+
+                group3.enableBody(true, group3.x, 100, true, true);
+                group3.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                group3.setScale(.5);
+                group3.setBounce(1);
+                group3.setCollideWorldBounds(true);
+                group3.setVelocity(Phaser.Math.Between(-200, 200), 20);
+                enemyGroup3.allowGravity = false;
+                if(enemyGroup3.countActive(true)>maxEnemies3){
+                    group3.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    group3.setVelocity(0, Phaser.Math.Between(0,300));
+                }
+
+            });
+        }
+    }
+
+    function playerHit3(player, badguy){
+
+        badguy.disableBody(true,true);
+        lives-=1;
+        txtLivesR.setText(+lives);
+        
+        if(lives === 4){
+            player.setTint(0xf1dcdc);
+        }
+        else if(lives === 3){
+            player.setTint(0xecb7b7);
+        }
+        else if(lives === 2){
+            player.setTint(0xfa8c8c);
+        }
+        else if(lives === 1){
+            player.setTint(0xff5555);
+        }
+        else{
+            game.scene.stop("Level1");
+            game.scene.stop("Transition2");
+            game.scene.stop("Level2");
+            game.scene.stop("Transition3");
+            game.scene.stop("Level3");
+            game.scene.start("Over");
+        }
+        
+        player.setBounce(0.0);
+
+        //If game not over add more badbuys
+        if (enemyGroup3.countActive(true) == 0)
+        {   
+            maxEnemies3+=1;
+            enemyGroup3.children.iterate(function (child) {
+
+                child.enableBody(true, child.x, 0, true, true);
+                child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                child.setScale(.5);
+                child.setBounce(1);
+                child.setCollideWorldBounds(true);
+                child.setVelocity(Phaser.Math.Between(-200, 200), 20);
+                child.allowGravity = false;
+                if(enemyGroup3.countActive(true)>maxEnemies3){
+                    child.disableBody(true,true);
+                    
+                }
+                else 
+                {
+                    child.setVelocity(0, Phaser.Math.Between(0, 300));
+
+                }
+
+            });
+        }
+
+
+    }
+
+    function enemyOverlap3(enemy1, enemy2){
+        enemy1.x=Math.round(Math.random()*800);
+        enemy2.x=Math.round(Math.random()*800);
+     }
+
+    
+
+
+
+     class gameOver extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            this.load.image("up","Images/up.png");
+            this.load.image("down","Images/down.png")
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+           sky=this.add.image(400,300,"sky");
+           up=this.physics.add.image(320,250,"up");
+           up.setScale(.1);
+           down=this.physics.add.image(320,300,"down"); 
+           down.setScale(.1); 
+           txtWin=this.add.text(300,150,"GAME OVER", {fontFamily:"Arial Black", fontSize:40, color:'red'});
+           txtMainMenu=this.add.text(350,250, "Main Menu", {fontFamily:"Monaco", fontSize:20, color:'white'});
+           txtRetry=this.add.text(350,300,"Retry?", {fontFamily:"Monaco", fontSize:20, color:'white'});
+
+           upKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+            downKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+
+            if(upKey.isDown)
+            {
+                game.scene.stop("Over");
+                game.scene.start("Title");
+            }
+
+            if(downKey.isDown)
+            {
+               game.scene.stop("Over");
+               game.scene.start("Transition1"); 
+            }
+           
+
+        }//end of update
+
+    }
+
+    class win extends Phaser.Scene {
+        
+        constructor (config)
+        {
+            super(config);
+        }
+
+        preload ()//we load game resources into memory in this function
+        {   
+            this.load.image("ship","Images/ship.png");
+            this.load.image("sky","Images/sky.jpg");
+            this.load.image("up","Images/up.png");
+            this.load.image("down","Images/down.png")
+            //load sound resources
+            this.load.audio("enter",["EnterGame.mp3"]);
+            this.load.image("up","Images/up.png");
+            this.load.image("down","Images/down.png");
+
+
+        }//end of preload
+
+        create (data)//here we create the resources, assign them to variables and add them into our game world
+        {
+           sky=this.add.image(400,300,"sky");  
+           up=this.physics.add.image(320,250,"up");
+           up.setScale(.1);
+           down=this.physics.add.image(320,300,"down"); 
+           down.setScale(.1); 
+           txtGameOver=this.add.text(325,150,"YOU WON!", {fontFamily:"Arial Black", fontSize:40, color:'red'});
+           txtMainMenu=this.add.text(350,250, "Main Menu", {fontFamily:"Monaco", fontSize:20, color:'white'});
+           txtRetry=this.add.text(350,300,"Retry?", {fontFamily:"Monaco", fontSize:20, color:'white'});
+
+
+           upKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+            downKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        }//end of create
+
+        update()//game loop, where all decisions and updates are made 
+        {
+ 
+           if(upKey.isDown)
+            {
+                game.scene.stop("Victory");
+                game.scene.start("Title");
+            }
+
+            if(downKey.isDown)
+            {
+               game.scene.stop("Victory");
+               game.scene.start("Transition1"); 
+            }
+            score=0;
+
+
+        }//end of update
+    }
+
+
+    var config = {
+        type: Phaser.AUTO,
+        parent: 'phaser-example',
+        width: 800,
+        height: 600,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                debug: false
+             
+                }
+        }
+    };
+
+    var game = new Phaser.Game(config);
+   
+    game.scene.add("Title",title);
+    game.scene.add("Transition1",transition1);
+    game.scene.add("Level1",level1);
+    game.scene.add("Transition2",transition2);
+    game.scene.add("Level2",level2);
+    game.scene.add("Transition3",transition3);
+    game.scene.add("Level3",level3);
+    //game.scene.add("Boss",boss);
+    game.scene.add("Over",gameOver);
+    game.scene.add("Victory",win)
+    game.scene.start("Title");
+
+   
+    
+    </script>
+
+</body>
+</html>
+
+
+
+
